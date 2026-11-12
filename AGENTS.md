@@ -37,8 +37,8 @@ This file is the single source of truth for all coding agents; `CLAUDE.md` impor
 ## Trial mode
 - `--trial` proves the whole chain works without real assets or hours of waiting. `pipeline build episodes/<slug> --trial` generates any missing clips/audio synthetically (color bars, noise) and builds a 10-minute video instead of the full duration; the same steps and QC checks run.
 - `/build-episode <slug> --trial` and `/weekly-batch --trial` pass it through. Offer it whenever real assets are missing; never use it silently in place of a real build.
-- A trial output is never uploaded. `metadata.json` records `build.trial: true`; title, CTA and chapters still describe the full-length video, so the duration-consistency checks are skipped.
-- Synthetic files are written to the paths the episode names and are not overwritten later. Before the real build, replace them with real renders/recordings and update `assets/audio/LICENSES.md`.
+- A trial output is never uploaded. `metadata.json` records `build.trial: true`; title, CTA and chapters still describe the full-length video, so the duration-consistency checks and the audio license check are skipped.
+- Synthetic files are written to the paths the episode names and are not overwritten later. Before the real build, replace them with real renders/recordings and add their rows to `assets/audio/LICENSES.md`; a real build fails QC for any audio file without a row.
 
 ## Branding
 - Every brand-specific value lives in `config/brand.yaml`. A fork commits its own `brand.yaml`; a local clone uses `brand.local.yaml`. Do not write the brand name, handle, language or CTA in any other file.

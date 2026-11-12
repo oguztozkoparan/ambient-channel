@@ -15,4 +15,4 @@ user-invocable: false
 - Metadata: the title has no more than 70% word overlap with any of the last 20 episodes; description and chapters are filled; the duration in the title matches the real duration; no chapter exceeds the video duration.
 - Brand: texts are in the `config/brand.yaml` `channel.language` language; the description ends with `metadata.description_footer`; the Short CTA comes from the `short.cta` template (or the episode override); if `watermark.file` is set, it is visible in the long and the short.
 - Audio sources: every file used is recorded in `assets/audio/LICENSES.md`.
-- Trial builds (`build.trial: true` in `metadata.json`): synthetic inputs and a shortened duration are intended; the title-duration and chapter checks are skipped. A trial that passes proves the flow, not the episode: it is never uploaded.
+- Trial builds (`build.trial: true` in `metadata.json`): synthetic inputs and a shortened duration are intended; the title-duration, chapter and audio-license checks are skipped. A trial that passes proves the flow, not the episode: it is never uploaded.

@@ -65,6 +65,6 @@ def run() -> int:
 
     build_ok = all(ok for ok, _, _ in build)
     prod_ok = build_ok and all(ok for ok, _, _ in production)
-    print(f"\nTrial build (pipeline synth + build): {'ready' if build_ok else 'NOT READY'}")
+    print(f"\nTrial build (pipeline build --trial): {'ready' if build_ok else 'NOT READY'}")
     print(f"Real production: {'ready' if prod_ok else 'NOT READY'}")
     return 0 if build_ok else 1

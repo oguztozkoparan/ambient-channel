@@ -21,7 +21,7 @@ At any time, `uv run python -m pipeline doctor` tells you what is ready and what
 
 ## Extra setup for real production
 - Unity CLI: `brew install --cask unity-cli`, `unity auth login`, `unity install lts`. Open the project: `unity open unity`. With the Editor open, `unity pipeline install`; check: `unity pipeline list` → "Pipeline: Installed". Add the Unity Recorder package (`com.unity.recorder`).
-- Audio: files go under `assets/audio/` (not tracked in git), each recorded in `assets/audio/LICENSES.md` with its source and license. Replace the synthetic placeholder rows from the template with real records.
+- Audio: files go under `assets/audio/` (not tracked in git), each recorded in `assets/audio/LICENSES.md` with its source and license. A real build fails QC for any audio file without a row there, including leftover synthetic files from a trial.
 - fal.ai MCP is optional (thumbnail background / concept image; every generation spends fal credits). Defined in `.mcp.json`; OAuth via `/mcp` on first use. Not used for the main loop visual.
 - The Unity scene kit is not part of this repo: each user builds their own under `unity/`. `docs/KICKOFF.md` is a ready-made session prompt for that.
 

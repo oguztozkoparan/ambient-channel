@@ -68,3 +68,10 @@ def test_older_brand_without_new_fields_still_loads(project: Path):
     brand = Path("config/brand.yaml")
     brand.write_text(brand.read_text().replace("  text_color: white\n  outline_color: black\n", ""))
     assert load_episode(project).short.text_color == "white"
+
+
+def test_real_build_flags_audio_without_license_row(project: Path):
+    from pipeline import qc
+
+    check = qc._licenses({"audio_files": ["assets/audio/bed.wav", "assets/audio/unlisted.wav"]})
+    assert check["value"] == ["unlisted.wav"] and not check["pass"]

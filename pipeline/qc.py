@@ -171,7 +171,8 @@ def run(out: Path) -> int:
     checks += _short(short)
     checks.append(_thumbnail(out / "thumbnail.jpg"))
     checks += _metadata(meta)
-    checks.append(_licenses(build))
+    if not build.get("trial"):  # synthetic trial inputs have no license to record
+        checks.append(_licenses(build))
 
     (out / "qc.json").write_text(json.dumps(checks, indent=2, ensure_ascii=False) + "\n")
     for c in checks:
