@@ -1,0 +1,17 @@
+.env*
+output/
+assets/
+episodes/
+.venv/
+__pycache__/
+unity/[Ll]ibrary/
+unity/[Tt]emp/
+unity/[Oo]bj/
+unity/[Ll]ogs/
+unity/[Uu]ser[Ss]ettings/
+unity/Recordings/
+unity/**/*.meta
+unity/**/*.unity
+unity/**/*.prefab
+unity/**/*.asset
+unity/**/*.mat

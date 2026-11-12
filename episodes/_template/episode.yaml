@@ -1,0 +1,42 @@
+slug: example-outpost-night
+seed: 1
+use_case: general     # general | sleep | focus — varsayılanlar config/use_cases.yaml
+variant_of: null      # sleep/focus varyantıysa kaynak episode slug
+title: "Rain on a Space Outpost Window | 8 Hours Sci-Fi Ambience for Sleep, Study & Relaxation"
+description: |
+  Heavy rain against the observation window of a remote outpost, with the low hum of
+  the station and distant thunder rolling across the plain.
+tags: [sci-fi ambience, rain sounds, sleep, space station]
+chapters:
+  - {t: "00:00", label: "Storm rolls in"}
+  - {t: "04:00:00", label: "Deep night"}
+
+# duration: 10h       # opsiyonel; use_case varsayılanını ezer
+loop_seconds: 60
+
+visual:
+  unity_preset: OutpostNight_Storm   # unity/Assets/Presets/
+  clip_16x9: assets/clips/example-outpost-night/loop_16x9.mp4
+  clip_9x16: assets/clips/example-outpost-night/loop_9x16.mp4   # opsiyonel
+  crf: 20
+
+audio:
+  # target_lufs: -20   # opsiyonel; use_case varsayılanını ezer
+  true_peak: -1.5
+  beds:
+    - {file: assets/audio/rain_glass_heavy.wav, gain_db: 0}
+    - {file: assets/audio/station_hum_low.wav, gain_db: -9}
+  events:
+    - {file: assets/audio/thunder_far_*.wav, every_s: [90, 300], gain_db: [-12, -4]}
+    - {file: assets/audio/metal_creak_*.wav, every_s: [120, 400], gain_db: [-18, -10]}
+
+short:
+  duration_s: 30
+  # font: assets/fonts/SpaceGrotesk-Medium.ttf   # opsiyonel; config/brand.yaml short.font varsayılanını ezer
+  hook: "POV: night shift on Mars"
+  line2: "the storm won't stop"
+  # cta: "Full 8h on the channel"                # opsiyonel; config/brand.yaml short.cta varsayılanını ezer
+
+disclosure:
+  synthetic_realistic: false
+  note: "Unity render, own sound design"
