@@ -1,4 +1,4 @@
-"""Kendi kendine yeten mini proje: testler repo'nun brand.yaml'ına bağlı değildir (fork güvenli)."""
+"""Self-contained mini project: tests do not depend on the repo's brand.yaml (fork-safe)."""
 
 import shutil
 from pathlib import Path
@@ -62,20 +62,20 @@ short:
 """
 
 LICENSES = """
-| Dosya | Kaynak | Lisans | Not |
+| File | Source | License | Note |
 |---|---|---|---|
-| bed.wav | sentetik | CC0 | |
-| ping_1.wav | sentetik | CC0 | |
-| ping_2.wav | sentetik | CC0 | |
+| bed.wav | synthetic | CC0 | |
+| ping_1.wav | synthetic | CC0 | |
+| ping_2.wav | synthetic | CC0 | |
 """
 
 
 @pytest.fixture
 def project(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    """tmp_path altında mini proje kurar, oraya chdir eder, episode dizinini döner."""
+    """Sets up a mini project under tmp_path, chdirs into it, returns the episode directory."""
     fonts = sorted((REPO / "assets/fonts").glob("*.ttf"))
     if not fonts:
-        pytest.skip("assets/fonts altında .ttf yok")
+        pytest.skip("no .ttf under assets/fonts")
     for sub in ("config", "episodes/demo", "assets/fonts", "assets/audio"):
         (tmp_path / sub).mkdir(parents=True)
     (tmp_path / "config/brand.yaml").write_text(BRAND)

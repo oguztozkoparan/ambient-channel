@@ -1,4 +1,4 @@
-"""output/<slug> için ölçülebilir QC kontrolleri -> qc.json ({check, value, threshold, pass})."""
+"""Measurable QC checks for output/<slug> -> qc.json ({check, value, threshold, pass})."""
 
 import json
 import re
@@ -39,13 +39,13 @@ def _loudness(long: Path, build: dict) -> list[dict]:
 def _seam_visual(long: Path, build: dict, work: Path) -> dict:
     loop = build["loop_s"]
     if build["total_s"] < 2 * loop - 1e-6:
-        return _check("seam_visual_ssim_drop", None, "tek loop, dikiş yok", True)
+        return _check("seam_visual_ssim_drop", None, "single loop, no seam", True)
     stats = work / "qc_ssim.log"
     graph = (
         "[0:v]split[a][b];[b]trim=start_frame=1,setpts=PTS-STARTPTS[b1];"
         f"[a][b1]ssim=shortest=1:stats_file={stats}"
     )
-    # ilk loop sınırının ±1 sn'sindeki ardışık frame çiftleri
+    # consecutive frame pairs within ±1 s of the first loop boundary
     ffmpeg.ffmpeg("-ss", loop - 1, "-t", 2, "-i", long, "-an", "-lavfi", graph, "-f", "null", "-")
     values = [float(v) for v in re.findall(r"All:([\d.]+)", stats.read_text())]
     drop = round(statistics.median(values) - min(values), 4)
@@ -55,7 +55,7 @@ def _seam_visual(long: Path, build: dict, work: Path) -> dict:
 def _seam_audio(long: Path, build: dict, work: Path) -> dict:
     loop = build["loop_s"]
     if build["total_s"] < 2 * loop - 1e-6:
-        return _check("seam_audio_rms_jump_db", None, "tek loop, dikiş yok", True)
+        return _check("seam_audio_rms_jump_db", None, "single loop, no seam", True)
     raw = work / "qc_seam.f32"
     ffmpeg.ffmpeg(
         *["-ss", loop - 0.05, "-t", 0.1, "-i", long, "-vn"],
@@ -65,7 +65,7 @@ def _seam_audio(long: Path, build: dict, work: Path) -> dict:
     before, after = np.array_split(samples, 2)
     rms = [20 * np.log10(max(float(np.sqrt(np.mean(x**2))), 1e-9)) for x in (before, after)]
     jump = round(abs(rms[1] - rms[0]), 2)
-    # shortcut: yalnızca RMS sıçraması; click tespiti yok, gerekirse örnek-farkı eşiği ekle
+    # shortcut: RMS jump only; no click detection, add a sample-diff threshold if needed
     return _check("seam_audio_rms_jump_db", jump, "< 3", jump < 3)
 
 
@@ -94,7 +94,7 @@ def _words(text: str) -> set[str]:
 def _metadata(meta: dict) -> list[dict]:
     build = meta["build"]
     title = _words(meta["title"])
-    # shortcut: "son 20" yerine tüm diğer episode'lar; episode'lara tarih alanı gelirse sırala
+    # shortcut: all other episodes instead of "last 20"; sort if episodes get a date field
     others = [
         _load(p)
         for p in sorted(EPISODES.glob("*/episode.yaml"))
@@ -113,7 +113,7 @@ def _metadata(meta: dict) -> list[dict]:
         _check(
             "description_filled",
             len(meta["description"]),
-            "> 3 karakter",
+            "> 3 characters",
             len(meta["description"].strip(" .\n")) > 3,
         ),
         _check("chapters_filled", len(meta["chapters"]), ">= 1", len(meta["chapters"]) >= 1),
@@ -123,18 +123,18 @@ def _metadata(meta: dict) -> list[dict]:
         hours = f"{nominal / 3600:g}"
         numbers = re.findall(r"\d+(?:\.\d+)?", meta["title"])
         ok = not numbers or hours in numbers
-        checks.append(_check("title_duration_consistent", numbers, f"{hours} saat", ok))
-        # "HH:MM:SS" / "MM:SS" -> sn; chapter videonun dışına düşmemeli
+        checks.append(_check("title_duration_consistent", numbers, f"{hours} hours", ok))
+        # "HH:MM:SS" / "MM:SS" -> s; a chapter must not fall outside the video
         stamps = [
             sum(float(x) * 60**i for i, x in enumerate(reversed(c["t"].split(":"))))
             for c in meta["chapters"]
         ]
         late = [c["t"] for c, t in zip(meta["chapters"], stamps, strict=True) if t >= nominal]
-        checks.append(_check("chapters_within_duration", late, "süreyi aşan chapter yok", not late))
+        checks.append(_check("chapters_within_duration", late, "no chapter past end", not late))
     footer = build["description_footer"].strip()
     if footer:
         ok = meta["description"].rstrip().endswith(footer)
-        checks.append(_check("description_footer", ok, "brand footer ile biter", ok))
+        checks.append(_check("description_footer", ok, "ends with brand footer", ok))
     return checks
 
 
@@ -143,7 +143,7 @@ def _licenses(build: dict) -> dict:
         line.split("|")[1].strip(" `") for line in LICENSES.read_text().splitlines() if "|" in line
     ]
     missing = sorted({Path(f).name for f in build["audio_files"]} - set(rows))
-    return _check("audio_licenses_recorded", missing, "eksik dosya yok", not missing)
+    return _check("audio_licenses_recorded", missing, "no missing files", not missing)
 
 
 def run(out: Path) -> int:
@@ -154,7 +154,7 @@ def run(out: Path) -> int:
 
     measured = round(ffmpeg.duration(long), 2)
     target = build["target_duration_s"]
-    # 20 ms: kap süresi yuvarlaması
+    # 20 ms: container duration rounding
     checks = [_check("long_duration_s", measured, f">= {target:g}", measured >= target - 0.02)]
     checks += _loudness(long, build)
     checks += [_seam_visual(long, build, work), _seam_audio(long, build, work)]
@@ -167,5 +167,5 @@ def run(out: Path) -> int:
     for c in checks:
         print(f"{'pass' if c['pass'] else 'FAIL'}  {c['check']}: {c['value']} ({c['threshold']})")
     failed = [c["check"] for c in checks if not c["pass"]]
-    print(f"{out}/qc.json: " + ("tüm kontroller pass" if not failed else f"FAIL: {failed}"))
+    print(f"{out}/qc.json: " + ("all checks pass" if not failed else f"FAIL: {failed}"))
     return 1 if failed else 0

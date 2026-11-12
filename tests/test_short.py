@@ -10,8 +10,8 @@ from tests.test_video import make_ep, vstream
 def test_pick_window():
     assert short.pick_window([], 60, 20) == 0
     assert short.pick_window([5, 40, 41, 42], 60, 20) == 40
-    assert short.pick_window([55, 56, 57], 60, 20) == 40  # ses sonunu aşmaz
-    assert short.pick_window([1, 30], 60, 20) == 0  # eşitlikte en erken (0 penceresi 1'i kapsar)
+    assert short.pick_window([55, 56, 57], 60, 20) == 40  # does not run past the end of the audio
+    assert short.pick_window([1, 30], 60, 20) == 0  # earliest on a tie (the 0 window covers 1)
 
 
 @pytest.fixture(scope="module")

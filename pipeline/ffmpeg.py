@@ -1,4 +1,4 @@
-"""Tüm ffmpeg/ffprobe çağrıları buradan geçer: -hide_banner -loglevel error -nostats."""
+"""All ffmpeg/ffprobe calls go through here: -hide_banner -loglevel error -nostats."""
 
 import json
 import re
@@ -13,7 +13,7 @@ from pipeline.progress import Progress
 def ffmpeg(
     *args: object, loglevel: str = "error", progress: tuple[str, float] | None = None
 ) -> str:
-    """ffmpeg çalıştırır, stderr döner. Ölçüm filtreleri (ebur128, loudnorm): loglevel="info".
+    """Runs ffmpeg, returns stderr. Measurement filters (ebur128, loudnorm): loglevel="info".
 
     progress=(label, total_seconds): draws a progress bar from ffmpeg's -progress file.
     """

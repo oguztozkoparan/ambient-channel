@@ -1,4 +1,4 @@
-"""metadata.json (upload metinleri + build kaydı) ve events.json."""
+"""metadata.json (upload texts + build record) and events.json."""
 
 import json
 from dataclasses import asdict
@@ -52,7 +52,7 @@ def write(
             "short_audio_start_s": short_info["audio_start_s"],
         },
     }
-    # zaman damgası yok: aynı config + seed = aynı dosya
+    # no timestamp: same config + seed = same file
     (out / "metadata.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n")
     events = [asdict(e) for e in rendered.events]
     (out / "events.json").write_text(json.dumps(events, indent=2) + "\n")

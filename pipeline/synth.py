@@ -1,7 +1,7 @@
-"""Episode'un eksik klip/ses girdilerini ffmpeg lavfi ile üretir.
+"""Generates the episode's missing clip/audio inputs with ffmpeg lavfi.
 
-Yalnızca kurulum denemesi içindir; gerçek episode'da Unity render'ı ve lisanslı ses kullanılır.
-Var olan dosyaya dokunmaz.
+Only for trying out the setup; real episodes use a Unity render and licensed audio.
+Does not touch existing files.
 """
 
 from pathlib import Path
@@ -13,7 +13,7 @@ FPS = 30
 
 
 def _clip(path: Path, size: str, loop_s: float) -> None:
-    # sabit desen + periyodik hue döngüsü; loop süresi periyodun tam katı olduğundan seamless
+    # fixed pattern + periodic hue cycle; seamless since the loop is an exact multiple of the period
     period = loop_s / max(1, round(loop_s / 10))
     source = f"smptehdbars=s={size}:r={FPS},hue=H=2*PI*t/{period}"
     ffmpeg(
@@ -52,6 +52,6 @@ def run(ep: Episode) -> int:
             made.append(path)
 
     for path in made:
-        print(f"sentetik: {path}")
-    print(f"{len(made)} dosya üretildi" if made else "eksik girdi yok")
+        print(f"synthetic: {path}")
+    print(f"{len(made)} files generated" if made else "no missing inputs")
     return 0

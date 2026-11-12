@@ -1,4 +1,4 @@
-"""Short: 1080x1920, event yoğun pencereden ses, hook/line2/CTA metni, fade in/out."""
+"""Short: 1080x1920, audio from the event-dense window, hook/line2/CTA text, fade in/out."""
 
 import textwrap
 from pathlib import Path
@@ -15,13 +15,13 @@ W, H = 1080, 1920
 FADE_S = 0.5
 HOOK_S = 2.0
 CTA_S = 3.0
-WRAP = 18  # satır başına karakter (punto oranıyla birlikte 1080 genişliğe sığar)
+WRAP = 18  # characters per line (with the font size ratio, fits 1080 width)
 HOOK_SIZE, LINE2_SIZE, CTA_SIZE = 80, 56, 52
 LINE_SPACING = 12
 
 
 def pick_window(starts: list[float], audio_len: float, dur: float) -> float:
-    """En çok event başlangıcı içeren [s, s+dur) penceresi; eşitlikte en erken."""
+    """The [s, s+dur) window with the most event starts; earliest on a tie."""
     last = max(0.0, audio_len - dur)
     cands = sorted({0.0, *(min(t, last) for t in starts)})
     best, best_n = 0.0, -1
@@ -41,7 +41,7 @@ def build_short(ep: Episode, audio: "AudioResult", out: Path, work: Path) -> dic
     sh = ep.short
     texts = [("hook", sh.hook, HOOK_SIZE, "h*0.16", f"lt(t,{HOOK_S:g})")]
     if sh.line2:
-        # line2, hook'un gerçek satır sayısının altına yerleşir (uzun hook'ta üst üste binmesin)
+        # line2 sits below the hook's actual line count (so a long hook does not overlap it)
         hook_h = (textwrap.fill(sh.hook, WRAP).count("\n") + 1) * (HOOK_SIZE + LINE_SPACING)
         texts.append(("line2", sh.line2, LINE2_SIZE, f"h*0.16+{hook_h + 50}", f"lt(t,{HOOK_S:g})"))
     texts.append(("cta", sh.cta, CTA_SIZE, "h*0.78", f"gte(t,{dur - CTA_S:g})"))
@@ -54,7 +54,7 @@ def build_short(ep: Episode, audio: "AudioResult", out: Path, work: Path) -> dic
     draws = []
     for name, text, size, y, enable in texts:
         f = work / f"short_{name}.txt"
-        f.write_text(textwrap.fill(text, WRAP))  # metin dosyadan: ':' ve "'" kaçışı gerekmez
+        f.write_text(textwrap.fill(text, WRAP))  # text from a file: no ':' or "'" escaping needed
         draws.append(
             f"drawtext=textfile='{fesc(f)}':fontfile='{fesc(sh.font)}':fontsize={size}"
             f":fontcolor={sh.text_color}:borderw=4:bordercolor={sh.outline_color}"

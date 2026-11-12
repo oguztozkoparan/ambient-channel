@@ -1,24 +1,24 @@
-# episode.yaml'da `use_case` seçilir; buradaki değerler varsayılandır, episode.yaml'daki alanlar ezer.
-general:            # varsayılan: sleep + study + relax için çok amaçlı
+# `use_case` is chosen in episode.yaml; values here are defaults, fields in episode.yaml override them.
+general:            # default: multi-purpose for sleep + study + relax
   duration: 8h
   target_lufs: -20
-  event_density: 1.0        # event aralıklarına çarpan (düşük = seyrek)
+  event_density: 1.0        # multiplier on event intervals (low = sparse)
   event_max_gain_db: -4
   overlay: none
   title_suffix: "Ambience for Sleep, Study & Relaxation"
-sleep:              # aynı sahnenin karanlık, sakin varyantı
+sleep:              # dark, calm variant of the same scene
   duration: 10h
   target_lufs: -22
   event_density: 0.6
-  event_max_gain_db: -8     # ani/sert transient yok
-  visual_exposure_ev: -1.5  # Unity preset'ine karanlık override
+  event_max_gain_db: -8     # no sudden/harsh transients
+  visual_exposure_ev: -1.5  # darkening override for the Unity preset
   overlay: none
   title_suffix: "Ambience for Deep Sleep"
-focus:              # timer'lı çalışma varyantı
+focus:              # study variant with a timer
   duration: 3h
   target_lufs: -20
   event_density: 0.5
-  event_max_gain_db: -10    # dikkat dağıtmayan, sabit bed ağırlıklı
+  event_max_gain_db: -10    # non-distracting, steady bed-heavy
   overlay: pomodoro
   pomodoro: {work_min: 25, break_min: 5, work_label: "Focus", break_label: "Break"}
   title_suffix: "Focus Ambience with Pomodoro Timer"

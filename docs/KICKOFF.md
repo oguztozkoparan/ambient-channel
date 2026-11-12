@@ -1,13 +1,13 @@
-# Sıradaki oturum prompt'u: Unity sahne kiti (Claude Code'a yapıştır)
+# Next session prompt: Unity scene kit (paste into Claude Code)
 
-Durum: `pipeline/` hazır (`build`, `qc`, `synth`, `doctor`; `uv run pytest -q` geçiyor; `episodes/_template` sentetik girdilerle uçtan uca build + QC'den geçiyor). Üretim için eksik tek parça `unity/`.
+Status: `pipeline/` is ready (`build`, `qc`, `synth`, `doctor`; `uv run pytest -q` passes; `episodes/_template` passes an end-to-end build + QC with synthetic inputs). The only piece missing for production is `unity/`.
 
-Önkoşul (elle): Unity CLI ve Unity 6 Editor kurulu, `unity auth login` yapılmış (bkz. README).
+Prerequisite (manual): Unity CLI and the Unity 6 Editor installed, `unity auth login` done (see README).
 
-Hedef: AGENTS.md'deki mimariye göre `unity/` altında Unity 6 (URP) projesini kur: `ScenePreset` ScriptableObject (ışık, hava, partikül, kamera yolu, palet), parametrik tek sahne, 16:9 ve 9:16 kamera, Unity Recorder ile seamless loop render'ı ve Unity CLI'dan tetiklenen tek bir editor script'i. İlk preset: şablondaki `OutpostNight_Storm`. `sleep` varyantı için `visual_exposure_ev` override'ını preset üzerinden uygula.
+Goal: set up the Unity 6 (URP) project under `unity/` following the architecture in AGENTS.md: a `ScenePreset` ScriptableObject (lighting, weather, particles, camera path, palette), a single parametric scene, 16:9 and 9:16 cameras, seamless loop rendering with Unity Recorder, and a single editor script triggered from the Unity CLI. First preset: `OutpostNight_Storm` from the template. Apply the `visual_exposure_ev` override for the `sleep` variant through the preset.
 
-Kısıtlar: AGENTS.md kuralları geçerli. Loop süresi episode.yaml `loop_seconds` ile aynı; ilk ve son frame eşleşmeli. Çıktılar `assets/clips/<slug>/loop_16x9.mp4` ve `loop_9x16.mp4`.
+Constraints: AGENTS.md rules apply. The loop length equals episode.yaml `loop_seconds`; the first and last frames must match. Outputs are `assets/clips/<slug>/loop_16x9.mp4` and `loop_9x16.mp4`.
 
-Akış: unity-scene-builder'a delege et; `unity <komut> --help` ile sözdizimini doğrulat. Recorder'ı önce açık Editor üzerinden çalıştır, headless yolu ancak doğrulandıktan sonra kullan. Sonunda qc-reviewer ile test et.
+Flow: delegate to unity-scene-builder; have it verify syntax with `unity <command> --help`. Run Recorder through the open Editor first; use the headless path only after it has been verified. Finally, test with qc-reviewer.
 
-Done: sentetik klipler Unity render'ı ile değiştirildi; `uv run python -m pipeline build episodes/_template --duration 10m` ve `qc` hatasız, `seam_visual_ssim_drop` < 0.02; `uv run python -m pipeline doctor` çıktısında Unity satırları `ok`.
+Done: synthetic clips replaced with a Unity render; `uv run python -m pipeline build episodes/_template --duration 10m` and `qc` run without errors, `seam_visual_ssim_drop` < 0.02; Unity rows are `ok` in the `uv run python -m pipeline doctor` output.

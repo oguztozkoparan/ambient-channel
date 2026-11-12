@@ -1,9 +1,9 @@
 ---
 name: new-episode
-description: Yeni bir episode klasörü ve episode.yaml oluşturur. Kullanıcı yeni video/tema eklemek istediğinde kullan.
-argument-hint: "[slug] [tema açıklaması]"
+description: Creates a new episode folder and episode.yaml. Use when the user wants to add a new video/theme.
+argument-hint: "[slug] [theme description]"
 ---
-1. `episodes/_template/episode.yaml` dosyasını `episodes/$0/episode.yaml` olarak kopyala.
-2. Tema: $ARGUMENTS. Alanları doldurmak için concept-planner alt ajanına delege et.
-3. Son 20 episode ile tema/preset/başlık çakışması varsa uyar.
-4. Gerekli ses katmanları veya Unity preset'i eksikse listele; uydurma dosya yolu yazma.
+1. Copy `episodes/_template/episode.yaml` to `episodes/$0/episode.yaml`.
+2. Theme: $ARGUMENTS. Delegate filling in the fields to the concept-planner subagent.
+3. Warn if the theme/preset/title clashes with the last 20 episodes.
+4. If required audio layers or the Unity preset are missing, list them; do not write made-up file paths.

@@ -1,4 +1,4 @@
-"""Ses pipeline'ı: bed + seed'li event'ler, chunk'lı render, two-pass loudnorm."""
+"""Audio pipeline: beds + seeded events, chunked render, two-pass loudnorm."""
 
 import hashlib
 import json
@@ -15,9 +15,9 @@ from pipeline.progress import Progress
 
 SR = 48000
 CHUNK_S = 30
-CROSSFADE_S = 3.0  # bed loop dikişi; bed'in dörtte birinden uzun olamaz
-FADE_S = 0.01  # event kenarlarında tık önleyici
-# shortcut: bed RMS ilk 10 dk'dan ölçülür; bed'ler periyodik olduğundan yeterli
+CROSSFADE_S = 3.0  # bed loop seam; cannot exceed a quarter of the bed
+FADE_S = 0.01  # click prevention at event edges
+# shortcut: bed RMS is measured from the first 10 min; enough since beds are periodic
 BED_RMS_WINDOW_S = 600
 SLEEP_EVENT_HEADROOM_DB = 10.0
 
@@ -44,9 +44,9 @@ def _db(x: float) -> float:
 
 
 def _load(src: Path, work: Path) -> np.ndarray:
-    """Kaynağı 48 kHz stereo float32'ye çevirip okur."""
+    """Reads the source converted to 48 kHz stereo float32."""
     if not src.is_file():
-        raise FileNotFoundError(f"ses dosyası bulunamadı: {src}")
+        raise FileNotFoundError(f"audio file not found: {src}")
     wav = work / f"src_{hashlib.sha1(str(src.resolve()).encode()).hexdigest()[:12]}.wav"
     ffmpeg("-i", src, "-ar", SR, "-ac", 2, "-c:a", "pcm_f32le", wav)
     data, _ = sf.read(wav, dtype="float32", always_2d=True)
@@ -55,10 +55,10 @@ def _load(src: Path, work: Path) -> np.ndarray:
 
 
 def _loop_unit(x: np.ndarray, fade: int) -> np.ndarray:
-    """Kuyruğu başa equal-power crossfade ile bağlar; birim kendi üzerine seamless döner."""
+    """Joins the tail to the head with an equal-power crossfade; the unit loops seamlessly."""
     fade = min(fade, len(x) // 4)
     if fade < 1:
-        raise ValueError("bed çok kısa: loop crossfade için en az 4 örnek gerekir")
+        raise ValueError("bed too short: loop crossfade needs at least 4 samples")
     theta = np.linspace(0, np.pi / 2, fade, dtype=np.float32)[:, None]
     head = x[:fade] * np.sin(theta) + x[len(x) - fade :] * np.cos(theta)
     return np.concatenate([head, x[fade : len(x) - fade]])
@@ -83,7 +83,7 @@ def _prep_event(x: np.ndarray) -> np.ndarray:
 
 
 def _plan_events(ep: Episode, work: Path, total: int, bed_rms_db: float):
-    """Tüm event'leri baştan planlar (chunk'tan bağımsız). [(start_frame, src, scale, EventHit)]."""
+    """Plans all events up front (chunk-independent). [(start_frame, src, scale, EventHit)]."""
     plan = []
     cache: dict[Path, np.ndarray] = {}
     if ep.event_density <= 0:
@@ -91,7 +91,7 @@ def _plan_events(ep: Episode, work: Path, total: int, bed_rms_db: float):
     for i, spec in enumerate(ep.audio.events):
         files = event_files(spec.file)
         if not files:
-            raise FileNotFoundError(f"event glob'u dosya bulamadı: {spec.file}")
+            raise FileNotFoundError(f"event glob matched no files: {spec.file}")
         rng = np.random.default_rng([ep.seed, i])
         t = 0.0
         while True:
@@ -114,7 +114,7 @@ def _plan_events(ep: Episode, work: Path, total: int, bed_rms_db: float):
             if ep.use_case == "sleep":
                 gain = min(gain, bed_rms_db + SLEEP_EVENT_HEADROOM_DB - p0)
             hit = EventHit(start / SR, len(src) / SR, gain, p0 + gain, str(f))
-            # örnekler kopyalanmaz, ölçek mix anında uygulanır: 10 saatte yüzlerce event var
+            # samples are not copied, scale is applied at mix time: 10 hours has hundreds of events
             plan.append((start, src, lr * np.float32(10 ** (gain / 20)), hit))
     plan.sort(key=lambda p: p[0])
     return plan
@@ -129,7 +129,7 @@ def _loudnorm(ep: Episode, raw: Path, out: Path, duration_s: float) -> None:
         progress=("loudnorm 1/2", duration_s),
     )
     m = json.loads(log[log.rindex("{") : log.rindex("}") + 1])
-    # hedef LRA >= ölçülen LRA: aksi hâlde loudnorm linear yerine dinamik (pompalayan) moda düşer
+    # target LRA >= measured LRA: otherwise loudnorm drops to dynamic (pumping) mode, not linear
     lra = min(max(math.ceil(float(m["input_lra"])), 1), 50)
     second = (
         f"{base}:LRA={lra}:measured_I={m['input_i']}:measured_LRA={m['input_lra']}"

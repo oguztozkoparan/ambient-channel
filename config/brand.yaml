@@ -1,32 +1,32 @@
-# Kanal kimliği: markaya özgü her şey burada. Kod, ajanlar ve skill'ler marka varsaymaz.
-# Fork: bu dosyayı düzenleyip commit'le.
-# Lokal klon: config/brand.local.yaml (git'e girmez) aynı şemayla alan bazında bu dosyayı ezer.
-# Öncelik: brand < use_cases.yaml < episode.yaml. Kurulum: /brand-setup
+# Channel identity: everything brand-specific lives here. Code, agents and skills assume no brand.
+# Fork: edit and commit this file.
+# Local clone: config/brand.local.yaml (not tracked in git) overrides this file per field, same schema.
+# Precedence: brand < use_cases.yaml < episode.yaml. Setup: /brand-setup
 channel:
   name: "Your Channel"
-  handle: "@your-handle"      # placeholder kaldıkça ajanlar içerik üretmeden önce /brand-setup önerir
+  handle: "@your-handle"      # while this stays a placeholder, agents suggest /brand-setup before producing content
   niche: "ambient soundscapes for sleep, study and relaxation"
-  language: en                # başlık, açıklama, tag ve Short metinlerinin dili
+  language: en                # language of titles, descriptions, tags and Short texts
   voice: "calm, cinematic, scene-specific; no clickbait"
 
 cadence:
-  longs_per_week: 5           # her long için 1 Short
-  max_variants_per_week: 2    # sleep/focus varyantı üst sınırı
+  longs_per_week: 5           # 1 Short per long
+  max_variants_per_week: 2    # upper limit for sleep/focus variants
 
 metadata:
-  # concept-planner için başlık kalıbı; nihai başlık episode.yaml `title` alanıdır.
-  # title_suffix use_cases.yaml'dan gelir (dil/niş değişirse orayı da güncelle).
+  # title pattern for concept-planner; the final title is the episode.yaml `title` field.
+  # title_suffix comes from use_cases.yaml (update it there too if the language/niche changes).
   title_pattern: "{scene} | {hours} Hours {genre} {title_suffix}"
-  description_footer: ""      # her açıklamanın sonuna eklenir (abone çağrısı, linkler, lisans notu)
+  description_footer: ""      # appended to every description (subscribe call, links, license note)
   default_tags: []
 
 short:
   font: assets/fonts/SpaceGrotesk-Medium.ttf
-  cta: "Full {hours}h on the channel"   # {hours}, {name}, {handle} kullanılabilir
+  cta: "Full {hours}h on the channel"   # {hours}, {name}, {handle} are available
   text_color: white
   outline_color: black
 
 watermark:
-  file: null                  # örn. assets/brand/logo.png; null = watermark yok
+  file: null                  # e.g. assets/brand/logo.png; null = no watermark
   position: bottom-right
   opacity: 0.6

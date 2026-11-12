@@ -1,6 +1,6 @@
-"""Config çözümü. Öncelik: brand.yaml < brand.local.yaml < use_cases.yaml < episode.yaml.
+"""Config resolution. Precedence: brand.yaml < brand.local.yaml < use_cases.yaml < episode.yaml.
 
-Yollar repo köküne (cwd) görelidir; komutlar repo kökünden çalıştırılır.
+Paths are relative to the repo root (cwd); commands are run from the repo root.
 """
 
 import glob
@@ -95,14 +95,14 @@ class Episode(_Model):
     description: str
     tags: list[str] = []
     chapters: list[Chapter] = []
-    duration_s: float  # bu build'in hedef süresi (--duration ile ezilebilir)
-    nominal_duration_s: float  # config'teki süre; başlık/CTA metinleri bunu kullanır
+    duration_s: float  # target duration of this build (--duration can override it)
+    nominal_duration_s: float  # duration from config; title/CTA texts use this
     loop_seconds: float
     event_density: float
     event_max_gain_db: float
     overlay: Literal["none", "pomodoro"] = "none"
     pomodoro: Pomodoro | None = None
-    visual_exposure_ev: float | None = None  # yalnızca Unity preset'i kullanır
+    visual_exposure_ev: float | None = None  # used only by the Unity preset
     title_suffix: str = ""
     visual: Visual
     audio: Audio
@@ -119,12 +119,12 @@ class Episode(_Model):
 
 
 def parse_duration(value: str | float) -> float:
-    """ "8h" / "10m" / "90s" / sayı -> saniye."""
+    """ "8h" / "10m" / "90s" / number -> seconds."""
     if isinstance(value, int | float):
         return float(value)
     m = re.fullmatch(r"(\d+(?:\.\d+)?)([hms])", value.strip())
     if not m:
-        raise ValueError(f"geçersiz süre: {value!r} (örn. 8h, 10m, 90s)")
+        raise ValueError(f"invalid duration: {value!r} (e.g. 8h, 10m, 90s)")
     return float(m[1]) * {"h": 3600, "m": 60, "s": 1}[m[2]]
 
 
@@ -151,7 +151,7 @@ def load_episode(episode_dir: Path, duration: str | None = None) -> Episode:
     use_cases = _load(CONFIG / "use_cases.yaml")
     name = raw.get("use_case", "general")
     if name not in use_cases:
-        raise ValueError(f"bilinmeyen use_case: {name!r} (config/use_cases.yaml)")
+        raise ValueError(f"unknown use_case: {name!r} (config/use_cases.yaml)")
 
     data = _merge(use_cases[name], raw)
     data["use_case"] = name
@@ -175,5 +175,5 @@ def load_episode(episode_dir: Path, duration: str | None = None) -> Episode:
 
 
 def event_files(pattern: str) -> list[Path]:
-    """Event glob'unu çözer; sıralı döner (determinizm)."""
+    """Resolves an event glob; returns it sorted (determinism)."""
     return sorted(Path(p) for p in glob.glob(pattern))

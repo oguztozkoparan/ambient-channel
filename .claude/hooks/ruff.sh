@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Python dosyası düzenlendiyse ruff format + check; hata varsa Claude'a geri bildirir (exit 2).
+# If a Python file was edited: ruff format + check; on errors, reports back to Claude (exit 2).
 f=$(jq -r '.tool_input.file_path // empty')
 [[ "$f" == *.py ]] || exit 0
 cd "$CLAUDE_PROJECT_DIR" || exit 0

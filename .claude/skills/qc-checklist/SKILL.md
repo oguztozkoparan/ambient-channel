@@ -1,16 +1,16 @@
 ---
 name: qc-checklist
-description: Episode çıktısı için ölçülebilir QC kontrolleri ve komutları. QC, doğrulama veya "video hazır mı" sorularında kullan.
+description: Measurable QC checks and commands for episode output. Use for QC, verification or "is the video ready" questions.
 user-invocable: false
 ---
-`uv run python -m pipeline qc output/<slug>` ölçülebilir kontrolleri yapar ve `output/<slug>/qc.json` içine `{check, value, threshold, pass}` yazar; qc.json elle yazılmaz. Aşağıdaki liste tam spec'tir. Komutun ölçemediği maddeler (pomodoro faz geçişi, hook/CTA görünürlüğü, metin dili, watermark, click) reviewer tarafından elle doğrulanır: ilgili andan `ffmpeg -ss <t> -frames:v 1` ile kare çıkar ve bak.
+`uv run python -m pipeline qc output/<slug>` runs the measurable checks and writes `{check, value, threshold, pass}` to `output/<slug>/qc.json`; qc.json is never written by hand. The list below is the full spec. Items the command cannot measure (pomodoro phase change, hook/CTA visibility, text language, watermark, click) are verified by hand by the reviewer: extract a frame at the relevant moment with `ffmpeg -ss <t> -frames:v 1` and look at it.
 
-- Süre: `ffprobe -v error -show_entries format=duration -of csv=p=0 long.mp4` ≥ hedef.
-- Loudness: `ffmpeg -hide_banner -nostats -i long.mp4 -t 600 -af ebur128=peak=true:framelog=verbose -f null -` → integrated hedef ±1 LU, true peak ≤ -1.0 dBTP.
-- Loop dikişi (görsel): loop sınırının ±1 sn'sinden frame çıkar, ardışık frame SSIM düşüşü < 0.02 olmalı.
-- Loop dikişi (ses): sınır ±50 ms penceresinde RMS sıçraması < 3 dB, click yok.
-- use_case: süre ve LUFS hedefi `config/use_cases.yaml` + episode override'larından çözülür. `sleep`: hiçbir event peak'i bed RMS'inin +10 dB üstünde değil. `focus`: pomodoro faz geçişleri config'teki dakikalarla ±1 sn eşleşiyor.
-- Short spec: 1080x1920, 20–45 sn, hook 0–2 sn içinde görünür, CTA son 3 sn.
-- Metadata: başlık son 20 episode'un hiçbiriyle %70'ten fazla kelime örtüşmesi yok; açıklama ve chapter'lar dolu; başlıktaki süre gerçek süreyle tutarlı; hiçbir chapter video süresini aşmıyor.
-- Marka: metinler `config/brand.yaml` `channel.language` dilinde; açıklama `metadata.description_footer` ile bitiyor; Short CTA'sı `short.cta` şablonundan (veya episode override'ından); `watermark.file` doluysa long ve short'ta görünür.
-- Ses kaynakları: kullanılan her dosya `assets/audio/LICENSES.md` içinde kayıtlı.
+- Duration: `ffprobe -v error -show_entries format=duration -of csv=p=0 long.mp4` ≥ target.
+- Loudness: `ffmpeg -hide_banner -nostats -i long.mp4 -t 600 -af ebur128=peak=true:framelog=verbose -f null -` → integrated target ±1 LU, true peak ≤ -1.0 dBTP.
+- Loop seam (visual): extract frames from ±1 s around the loop boundary; the SSIM drop between consecutive frames must be < 0.02.
+- Loop seam (audio): RMS jump < 3 dB in a ±50 ms window around the boundary, no click.
+- use_case: the duration and LUFS target are resolved from `config/use_cases.yaml` + episode overrides. `sleep`: no event peak above the bed RMS by more than +10 dB. `focus`: pomodoro phase changes match the minutes in config within ±1 s.
+- Short spec: 1080x1920, 20–45 s, hook visible within 0–2 s, CTA in the last 3 s.
+- Metadata: the title has no more than 70% word overlap with any of the last 20 episodes; description and chapters are filled; the duration in the title matches the real duration; no chapter exceeds the video duration.
+- Brand: texts are in the `config/brand.yaml` `channel.language` language; the description ends with `metadata.description_footer`; the Short CTA comes from the `short.cta` template (or the episode override); if `watermark.file` is set, it is visible in the long and the short.
+- Audio sources: every file used is recorded in `assets/audio/LICENSES.md`.

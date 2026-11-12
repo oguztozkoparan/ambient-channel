@@ -17,9 +17,9 @@ def test_parse_duration():
 def test_use_case_and_brand_defaults(project: Path):
     ep = load_episode(project)
     assert ep.duration_s == 8 * 3600 and not ep.duration_overridden
-    assert ep.audio.target_lufs == -20  # use_case varsayılanı
-    assert ep.short.cta == "Full 8h on @test"  # brand şablonu
-    assert ep.short.duration_s == 20  # episode alanı
+    assert ep.audio.target_lufs == -20  # use_case default
+    assert ep.short.cta == "Full 8h on @test"  # brand template
+    assert ep.short.duration_s == 20  # episode field
     assert ep.description_footer == "Subscribe for more."
 
 
@@ -43,7 +43,7 @@ def test_brand_local_overrides_brand_per_field(project: Path):
     Path("config/brand.local.yaml").write_text('channel: {handle: "@fork"}\n')
     ep = load_episode(project)
     assert ep.channel.handle == "@fork"
-    assert ep.channel.name == "Test Channel"  # ezilmeyen alan korunur
+    assert ep.channel.name == "Test Channel"  # a field that is not overridden is kept
     assert ep.short.cta == "Full 8h on @fork"
 
 

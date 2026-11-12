@@ -89,12 +89,12 @@ def test_sleep_cap(assets, tmp_path):
     res = audio.render(ep, tmp_path, DUR)
     assert res.events
     assert all(h.peak_db <= res.bed_rms_db + 10 + 1e-6 for h in res.events)
-    assert any(h.gain_db < 0 for h in res.events)  # kısma gerçekten devreye girdi
+    assert any(h.gain_db < 0 for h in res.events)  # the cap actually kicked in
 
 
 def test_errors(assets, tmp_path):
     ep = make_ep(assets)
-    ep.audio.beds[0].file = tmp_path / "yok.wav"
+    ep.audio.beds[0].file = tmp_path / "missing.wav"
     with pytest.raises(FileNotFoundError):
         audio.render(ep, tmp_path / "w", 10)
     ep = make_ep(assets)

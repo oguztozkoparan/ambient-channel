@@ -1,4 +1,4 @@
-"""Uçtan uca: synth -> build -> qc, sentetik girdilerle."""
+"""End to end: synth -> build -> qc, with synthetic inputs."""
 
 import json
 from pathlib import Path

@@ -1,9 +1,9 @@
 ---
 name: weekly-batch
-description: Haftalık episode batch'ini (adet config/brand.yaml'dan) planlar, build eder ve upload checklist'i üretir.
+description: Plans and builds the weekly episode batch (count from config/brand.yaml) and produces the upload checklist.
 disable-model-invocation: true
 ---
-1. `config/brand.yaml` `channel.handle` placeholder ise önce `/brand-setup`. concept-planner ile `cadence.longs_per_week` kadar farklı tema öner (çoğu `general`, en fazla `cadence.max_variants_per_week` `sleep`/`focus` varyantı); kullanıcıya tek liste olarak göster ve onay al (tek onay noktası bu).
-2. Onaylanan her tema için `/new-episode` adımlarını uygula.
-3. Her episode için `/build-episode` adımlarını sırayla uygula; onay bekleme.
-4. `output/week-<ISO hafta>/upload-checklist.md` yaz: önerilen yayın günü/saati (haftaya yayılmış), başlık, açıklama, tag, chapter, thumbnail yolu, short yolu ve "Altered or synthetic content" sorusunun cevabı (Unity render → hayır; istisna varsa gerekçesi).
+1. If `config/brand.yaml` `channel.handle` is a placeholder, run `/brand-setup` first. With concept-planner, propose `cadence.longs_per_week` distinct themes (mostly `general`, at most `cadence.max_variants_per_week` `sleep`/`focus` variants); show them to the user as a single list and get approval (this is the only approval point).
+2. For each approved theme, follow the `/new-episode` steps.
+3. For each episode, follow the `/build-episode` steps in order; do not wait for approval.
+4. Write `output/week-<ISO week>/upload-checklist.md`: suggested publish day/time (spread across the week), title, description, tags, chapters, thumbnail path, short path and the answer to the "Altered or synthetic content" question (Unity render → no; if there is an exception, the reason).

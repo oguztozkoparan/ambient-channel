@@ -1,5 +1,5 @@
 @AGENTS.md
 
-## Claude Code'a özel
-- graphify kuruluysa kod ararken grep/glob/read'den önce `graphify query` kullan.
-- Roller alt ajan olarak çalışır (`.claude/agents/`); işi ilgili alt ajana delege et.
+## Claude Code specific
+- If graphify is installed, use `graphify query` before grep/glob/read when searching code.
+- Roles run as subagents (`.claude/agents/`); delegate work to the relevant subagent.

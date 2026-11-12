@@ -105,7 +105,7 @@ def test_pomodoro(env):
     crop = "700:300:60:60"
     base, with_overlay = frame(long, 0.5, crop), frame(out, 0.5, crop)
     assert np.abs(base - with_overlay).mean() > 3
-    # faz değişince (work -> break) overlay değişir; arka plan t+4 sn'de aynı
+    # the overlay changes with the phase (work -> break); the background is the same at t+4 s
     assert np.abs(frame(out, 0.5, crop) - frame(out, 4.5, crop)).mean() > 1
 
 

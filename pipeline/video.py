@@ -1,4 +1,4 @@
-"""Long video: loop'u bir kez encode et, concat + -c copy ile uzat, sesi mux et."""
+"""Long video: encode the loop once, extend it with concat + -c copy, mux the audio."""
 
 import sys
 import time
@@ -9,17 +9,17 @@ from pipeline.ffmpeg import duration, ffmpeg, probe
 
 W, H = 1920, 1080
 WM_MARGIN = 40
-POMO_SIZE = 72  # overlay punto/konum oranları: layout sabiti, marka değil
+POMO_SIZE = 72  # overlay font size/position ratios: layout constants, not brand
 POMO_MARGIN = 60
 
 
 def fesc(value: object) -> str:
-    """Filter argümanı için kaçış (yol/metin): \\ ' ve : ."""
+    """Escaping for a filter argument (path/text): \\ ' and : ."""
     return str(value).replace("\\", "\\\\").replace("'", "\\'").replace(":", "\\:")
 
 
 def watermark_graph(ep: Episode, src: str, wm_input: int, out: str) -> str:
-    """`src` etiketine logo bindirir (wm_input: logo girdi indeksi); filter_complex parçası."""
+    """Overlays the logo on the `src` label (wm_input: logo input index); filter_complex part."""
     v, h = ep.watermark.position.split("-")
     x = f"x={WM_MARGIN}" if h == "left" else f"x=W-w-{WM_MARGIN}"
     y = f"y={WM_MARGIN}" if v == "top" else f"y=H-h-{WM_MARGIN}"
@@ -54,7 +54,7 @@ def encode_loop(ep: Episode, work: Path) -> Path:
     ffmpeg(
         *inputs, "-filter_complex", graph, "-map", "[v]", "-an",
         "-c:v", "libx264", "-crf", ep.visual.crf, "-pix_fmt", "yuv420p",
-        # -bf 0: B-frame gecikmesi/edit list olmadan her tekrar tam N frame ve temiz pts verir
+        # -bf 0: no B-frame delay/edit list, so every repeat gives exactly N frames and clean pts
         "-bf", 0, "-g", _frames(clip), "-sc_threshold", 0, "-flags", "+cgop",
         "-movflags", "+faststart", out,
         progress=("loop encode", duration(clip)),
@@ -69,7 +69,7 @@ def _concat_list(loop: Path, repeats: int, path: Path) -> Path:
 
 def _pomodoro_filter(ep: Episode, work: Path) -> str:
     p, s = ep.pomodoro, ep.short
-    assert p, "overlay=pomodoro için pomodoro config'i gerekli"
+    assert p, "overlay=pomodoro requires a pomodoro config"
     wsec, cyc = p.work_min * 60, (p.work_min + p.break_min) * 60
     ph = f"mod(t,{cyc:g})"
     style = (
@@ -82,7 +82,7 @@ def _pomodoro_filter(ep: Episode, work: Path) -> str:
         ("break", p.break_label, f"ceil({cyc:g}-{ph})", f"gte({ph},{wsec:g})"),
     ):
         (work / f"pomo_{name}_label.txt").write_text(label)
-        # textfile'da %{eif} açılımı çalışır; ':' kaçışsız yazılır
+        # %{eif} expansion works in a textfile; ':' is written unescaped
         (work / f"pomo_{name}_time.txt").write_text(
             f"%{{eif:floor({rem}/60):d:2}}:%{{eif:mod({rem},60):d:2}}"
         )
@@ -97,7 +97,7 @@ def _pomodoro_filter(ep: Episode, work: Path) -> str:
 
 def _encoders(ep: Episode) -> list[list[object]]:
     crf = ep.visual.crf
-    # shortcut: VideoToolbox'ta CRF yok, sabit bitrate; kalite yetmezse config'e bitrate alanı ekle
+    # shortcut: VideoToolbox has no CRF, fixed bitrate; add a bitrate config field if quality is low
     hw = [["-c:v", "h264_videotoolbox", "-b:v", "8M"], ["-c:v", "h264_nvenc", "-cq", crf]]
     return [*hw, ["-c:v", "libx264", "-crf", crf]]
 
@@ -127,10 +127,10 @@ def build_long(ep: Episode, loop: Path, audio: Path, total_s: float, out: Path) 
             except RuntimeError as e:
                 errs.append(str(e))
         else:
-            raise RuntimeError("tüm encoder'lar başarısız:\n" + "\n".join(errs))
+            raise RuntimeError("all encoders failed:\n" + "\n".join(errs))
         el = time.monotonic() - t0
         print(
-            f"pomodoro tam encode ({enc[1]}): {el:.1f} sn, gerçek zamanın {total_s / el:.1f}x'i",
+            f"pomodoro full encode ({enc[1]}): {el:.1f} s, {total_s / el:.1f}x real time",
             file=sys.stderr,
         )
     finally:

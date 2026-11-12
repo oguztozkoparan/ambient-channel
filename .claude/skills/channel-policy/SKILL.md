@@ -1,11 +1,11 @@
 ---
 name: channel-policy
-description: YouTube monetization politikası (inauthentic/mass-produced content, AI disclosure) açısından kanal kuralları. Tema, başlık, Short veya üretim kararlarında uygula.
+description: Channel rules with respect to YouTube monetization policy (inauthentic/mass-produced content, AI disclosure). Apply to theme, title, Short or production decisions.
 user-invocable: false
 ---
-- YouTube kanalı bütün olarak değerlendirir; videolar arası fark izleyicinin açıkça göreceği düzeyde olmalı: farklı sahne preset'i, farklı ses kompozisyonu, farklı konsept.
-- Aynı preset'i ufak renk değişikliğiyle tekrar kullanma. Aynı başlık kalıbını üst üste 3'ten fazla kullanma.
-- Gerçekçi sentetik içerik (gerçek sanılabilecek yer/olay/kişi) için Studio'da disclosure zorunlu. Ana görsel Unity render olduğu sürece genelde gerekmez; AI üretimi gerçekçi görsel veya ses ana içeriğe girerse checklist'te "evet" işaretle. Disclosure'ı atlatmaya yönelik iş yapma.
-- sleep/focus varyantı (`variant_of`) kaynak episode'dan izleyicinin fark edeceği kadar ayrışmalı (görsel varyant + ses mix + overlay); yalnızca başlık değişikliği yetmez.
-- Telifli müzik/ses yok; her kaynak lisans kaydıyla.
-- Kurallar değişebilir: emin olmadığın politika sorusunda YouTube Help'teki güncel sayfayı kontrol etmeyi öner.
+- YouTube evaluates the channel as a whole; the difference between videos must be clearly visible to the viewer: a different scene preset, a different audio composition, a different concept.
+- Do not reuse the same preset with a minor color change. Do not use the same title pattern more than 3 times in a row.
+- Realistic synthetic content (places/events/people that could be mistaken for real) requires disclosure in Studio. As long as the main visual is a Unity render it is usually not needed; if AI-generated realistic visuals or audio enter the main content, mark "yes" in the checklist. Do not do anything aimed at bypassing disclosure.
+- A sleep/focus variant (`variant_of`) must differ from its source episode enough for the viewer to notice (visual variant + audio mix + overlay); a title change alone is not enough.
+- No copyrighted music/audio; every source has a license record.
+- Rules can change: for a policy question you are unsure about, suggest checking the current page on YouTube Help.
