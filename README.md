@@ -33,6 +33,19 @@ Agent instructions are in `AGENTS.md` (shared by Claude Code, Codex, Cursor, etc
 Single video: `/new-episode <slug> <theme>` → `/build-episode <slug>`.
 Add `--trial` to `/build-episode` or `/weekly-batch` to run the same flow on synthetic inputs first.
 
+## Agent effort levels
+Each agent definition (`.claude/agents/*.md`) pins its reasoning effort. The agents also pin their model, and Claude Code applies your session's effort level only to subagents on the session's own model, so without an explicit `effort` the level would not be yours to control and results would vary by setup.
+
+| Agent | Effort | Why |
+|---|---|---|
+| `audio-engineer` | `high` | Agentic coding. Its mistakes surface late, in 8–10 hour builds. |
+| `video-engineer` | `high` | Agentic coding. ffmpeg filter escaping is easy to get subtly wrong. |
+| `unity-scene-builder` | `high` | Terminal-driven, multi-step work against a live Editor, with a CLI whose syntax must be checked each time. |
+| `concept-planner` | `medium` | Constrained text and YAML. `low` is clearly worse; `high` adds tokens without better output for this kind of work. |
+| `qc-reviewer` | `medium` | Read-only, checklist-driven measurement. |
+
+Basis (November 2026): for Sonnet 5.5, Anthropic reports 62.7% at `medium` against 77.8% at `high` on its internal agentic-coding benchmark, and about 7 points on a SWE-bench Pro subset for about 59% of the cost ([source](https://platform.claude.com/docs/en/about-claude/models/optimizing-for-cost-and-intelligence)); third-party measurements put tokens per task at roughly 1.8x. `xhigh` and `max` cost several times more and are not warranted for modules this small; if `unity-scene-builder` struggles at `high`, it is the one candidate for `xhigh`. The `unity-scene-builder` level is an estimate (it has not been run in this repo yet), and there is no per-effort benchmark for the Haiku-based `qc-reviewer`.
+
 ## Build times
 Long steps draw a progress bar with a time estimate (one line per 10% when not on a terminal).
 

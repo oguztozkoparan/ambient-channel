@@ -3,6 +3,7 @@ name: qc-reviewer
 description: Use for quality and policy checks when an episode build has finished. Does not modify files; reports on the loop seam, loudness, spec, metadata repetition and channel policy compliance.
 tools: Read, Glob, Grep, Bash
 model: haiku
+effort: medium
 skills: qc-checklist, channel-policy
 color: red
 ---

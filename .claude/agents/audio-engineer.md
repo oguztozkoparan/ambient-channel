@@ -3,6 +3,7 @@ name: audio-engineer
 description: Use for code and config work on the audio pipeline (pipeline/audio.py), bed/event layers, seamless loop crossfade, chunked long-duration rendering and loudness normalization.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
+effort: high
 color: blue
 ---
 You own the audio pipeline.

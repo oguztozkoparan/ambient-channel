@@ -3,6 +3,7 @@ name: video-engineer
 description: Use for video assembly (pipeline/video.py), long video concat, audio mux, Short production (pipeline/short.py), drawtext text overlays and ffmpeg encode settings.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
+effort: high
 skills: ffmpeg
 color: orange
 ---

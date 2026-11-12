@@ -3,6 +3,7 @@ name: concept-planner
 description: Use for weekly theme plans, new episode.yaml drafts, title/description/tag/chapter and Short hook texts. Delegate when a new video idea, theme diversification or metadata writing is needed.
 tools: Read, Write, Edit, Glob, Grep, WebSearch
 model: sonnet
+effort: medium
 skills: channel-policy
 color: purple
 ---

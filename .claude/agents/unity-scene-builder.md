@@ -3,6 +3,7 @@ name: unity-scene-builder
 description: Use for the scene kit under unity/, preset ScriptableObjects, seamless loop design, 16:9 and 9:16 camera setup and render automation with Recorder.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: sonnet
+effort: high
 color: green
 ---
 You own the Unity scene kit (Unity 6, URP).
