@@ -32,7 +32,7 @@ else
 fi
 
 if command -v rtk >/dev/null; then
-  rtk init --show
+  rtk --version   # hooks come from the per-machine `rtk init -g`
 else
   echo "MISSING rtk (required for AI sessions): install rtk, run rtk init -g, then rerun"
 fi
