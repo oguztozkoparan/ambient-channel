@@ -127,9 +127,9 @@ def _metadata(meta: dict) -> list[dict]:
         ),
         _check("chapters_filled", len(meta["chapters"]), ">= 1", len(meta["chapters"]) >= 1),
     ]
-    if not build["duration_overridden"]:
-        nominal = build["nominal_duration_s"]
-        hours = f"{nominal / 3600:g}"
+    if not build.get("trial"):  # a trial keeps full-length texts on a shortened video
+        target = build["target_duration_s"]
+        hours = f"{target / 3600:g}"
         numbers = re.findall(r"\d+(?:\.\d+)?", meta["title"])
         ok = not numbers or hours in numbers
         checks.append(_check("title_duration_consistent", numbers, f"{hours} hours", ok))
@@ -138,7 +138,7 @@ def _metadata(meta: dict) -> list[dict]:
             sum(float(x) * 60**i for i, x in enumerate(reversed(c["t"].split(":"))))
             for c in meta["chapters"]
         ]
-        late = [c["t"] for c, t in zip(meta["chapters"], stamps, strict=True) if t >= nominal]
+        late = [c["t"] for c, t in zip(meta["chapters"], stamps, strict=True) if t >= target]
         checks.append(_check("chapters_within_duration", late, "no chapter past end", not late))
     footer = build["description_footer"].strip()
     if footer:

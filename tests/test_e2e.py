@@ -34,8 +34,8 @@ def test_qc_flags_chapter_outside_video(project: Path):
         "description": "A demo description.",
         "chapters": [{"t": "00:00", "label": "a"}, {"t": "09:00:00", "label": "too late"}],
         "build": {
-            "duration_overridden": False,
-            "nominal_duration_s": 28800,
+            "trial": False,
+            "target_duration_s": 28800,
             "description_footer": "",
         },
     }
@@ -75,3 +75,19 @@ def test_real_build_flags_audio_without_license_row(project: Path):
 
     check = qc._licenses({"audio_files": ["assets/audio/bed.wav", "assets/audio/unlisted.wav"]})
     assert check["value"] == ["unlisted.wav"] and not check["pass"]
+
+
+def test_real_build_with_shortened_duration_flags_title(project: Path):
+    from pipeline import qc
+
+    meta = {
+        "slug": "demo",
+        "title": "Demo | 8 Hours",
+        "description": "A demo description.",
+        "chapters": [{"t": "00:00", "label": "a"}],
+        "build": {"trial": False, "target_duration_s": 600, "description_footer": ""},
+    }
+    by_name = {c["check"]: c for c in qc._metadata(meta)}
+    assert not by_name["title_duration_consistent"]["pass"]
+    meta["build"]["trial"] = True
+    assert "title_duration_consistent" not in {c["check"] for c in qc._metadata(meta)}
