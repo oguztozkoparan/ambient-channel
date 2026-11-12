@@ -33,6 +33,7 @@ def _build(args: argparse.Namespace) -> int:
     out = Path("output") / ep.slug
     work = out / "work"
     work.mkdir(parents=True, exist_ok=True)
+    (out / "qc.json").unlink(missing_ok=True)  # the old verdict does not describe this build
 
     loop = video.encode_loop(ep, work)
     loop_len = ffmpeg.duration(loop)

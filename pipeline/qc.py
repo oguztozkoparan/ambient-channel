@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 
 from pipeline import ffmpeg
-from pipeline.config import _load
+from pipeline.config import CONFIG, _load
 
 LICENSES = Path("assets/audio/LICENSES.md")
 EPISODES = Path("episodes")
@@ -102,7 +102,14 @@ def _words(text: str) -> set[str]:
 
 def _metadata(meta: dict) -> list[dict]:
     build = meta["build"]
-    title = _words(meta["title"])
+    # the use-case suffix and the duration number are shared by design, not repetition
+    suffixes = (uc.get("title_suffix", "") for uc in _load(CONFIG / "use_cases.yaml").values())
+    boilerplate = set().union(*map(_words, suffixes))
+
+    def scene(text: str) -> set[str]:
+        return {w for w in _words(text) if w not in boilerplate and not w.isdigit()}
+
+    title = scene(meta["title"])
     # shortcut: all other episodes instead of "last 20"; sort if episodes get a date field
     others = [
         _load(p)
@@ -111,9 +118,12 @@ def _metadata(meta: dict) -> list[dict]:
     ]
     overlap = max(
         (
-            len(title & _words(o.get("title", ""))) / max(len(title), 1)
+            len(title & scene(o.get("title", ""))) / max(len(title), 1)
             for o in others
             if o.get("slug") != meta["slug"]
+            # a variant shares its source's scene by design
+            and o.get("slug") != build.get("variant_of")
+            and o.get("variant_of") != meta["slug"]
         ),
         default=0.0,
     )

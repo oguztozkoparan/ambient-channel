@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 CONFIG = Path("config")
 PLACEHOLDER_HANDLE = "@your-handle"
@@ -28,6 +28,14 @@ class Event(_Model):
     file: str  # glob
     every_s: tuple[float, float]
     gain_db: tuple[float, float]
+
+    @field_validator("every_s")
+    @classmethod
+    def _interval_advances(cls, v: tuple[float, float]) -> tuple[float, float]:
+        if not 0 <= v[0] <= v[1] or v[1] <= 0:  # otherwise event planning never terminates
+            raise ValueError("every_s must be [min, max] with 0 <= min <= max and max > 0")
+        return v
+
     pan_jitter: float = Field(0.0, ge=0, le=1)
 
 
@@ -166,11 +174,14 @@ def load_episode(episode_dir: Path, duration: str | None = None) -> Episode:
 
     channel = brand["channel"]
     short = {**brand.get("short", {}), **data.get("short", {})}
-    short["cta"] = short["cta"].format(
-        hours=f"{nominal / 3600:g}", name=channel["name"], handle=channel["handle"]
-    )
+    values = {"hours": f"{nominal / 3600:g}", "name": channel["name"], "handle": channel["handle"]}
+    if "cta" in short:  # a missing cta is reported by validation below
+        try:
+            short["cta"] = short["cta"].format(**values)
+        except KeyError as e:
+            raise ValueError(f"short.cta: unknown placeholder {e}; use {sorted(values)}") from None
     data["short"] = short
-    data["watermark"] = brand.get("watermark") or {}
+    data["watermark"] = {**(brand.get("watermark") or {}), **(data.get("watermark") or {})}
     data["channel"] = channel
     meta = brand.get("metadata", {})
     data["description_footer"] = meta.get("description_footer", "")

@@ -58,7 +58,7 @@ def build_short(ep: Episode, audio: "AudioResult", out: Path, work: Path) -> dic
         draws.append(
             f"drawtext=textfile='{fesc(f)}':fontfile='{fesc(sh.font)}':fontsize={size}"
             f":fontcolor={sh.text_color}:borderw=4:bordercolor={sh.outline_color}"
-            f":line_spacing={LINE_SPACING}:text_align=C:x=(w-text_w)/2:y={y}:enable='{enable}'"
+            f":line_spacing={LINE_SPACING}:text_align=C:expansion=none:x=(w-text_w)/2:y={y}:enable='{enable}'"
         )
     graph += (
         f"[b1]{','.join(draws)},fade=t=in:d={FADE_S},fade=t=out:st={dur - FADE_S:g}:d={FADE_S}[v];"

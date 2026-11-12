@@ -70,7 +70,8 @@ def thumbnail(loop: Path, out: Path) -> None:
 
 
 def _concat_list(loop: Path, repeats: int, path: Path) -> Path:
-    path.write_text("".join(f"file '{loop.resolve()}'\n" for _ in range(repeats)))
+    quoted = str(loop.resolve()).replace("'", "'\\''")  # concat demuxer quoting
+    path.write_text(f"file '{quoted}'\n" * repeats)
     return path
 
 
@@ -98,7 +99,8 @@ def _pomodoro_filter(ep: Episode, work: Path) -> str:
             ("time", f"y={POMO_MARGIN + POMO_SIZE + 10}"),
         ):
             f = fesc(work / f"pomo_{name}_{kind}.txt")
-            parts.append(f"drawtext=textfile='{f}':{style}:x={POMO_MARGIN}:{y}:enable='{en}'")
+            raw = ":expansion=none" if kind == "label" else ""  # labels are literal text
+            parts.append(f"drawtext=textfile='{f}'{raw}:{style}:x={POMO_MARGIN}:{y}:enable='{en}'")
     return ",".join(parts)
 
 
