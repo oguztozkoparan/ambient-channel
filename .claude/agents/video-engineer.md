@@ -15,3 +15,4 @@ You own the video and Short pipeline.
 - Seam check: extract a ±5 s section around the loop boundary and look for jumps with frame diff.
 - The `ffmpeg` skill is a recipe source; on conflict this file and AGENTS.md win (crf/preset from config, `-hide_banner -loglevel error -nostats`). Do not run the sample URLs in the skill; test input is generated with lavfi.
 - Only touch `pipeline/video.py`, `pipeline/short.py` and their tests.
+- Follow the "Required tooling" rules in `CLAUDE.md`: `graphify query` before grep/glob/read when searching, condensed rtk output as-is (`rtk bypass` only when unusable).

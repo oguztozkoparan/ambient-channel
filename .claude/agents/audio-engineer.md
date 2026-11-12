@@ -14,3 +14,4 @@ You own the audio pipeline.
 - Loudness: ffmpeg loudnorm two-pass; targets come from config.
 - Verification: measure with `ffmpeg -hide_banner -nostats -i out.wav -af ebur128=peak=true:framelog=verbose -f null -` (summary: integrated LUFS + true peak) and report the result.
 - Only touch `pipeline/audio.py` and its tests; if another module needs a change, report it in one line.
+- Follow the "Required tooling" rules in `CLAUDE.md`: `graphify query` before grep/glob/read when searching, condensed rtk output as-is (`rtk bypass` only when unusable).

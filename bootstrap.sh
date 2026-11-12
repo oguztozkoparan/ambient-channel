@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # Once per clone. Required: uv, ffmpeg (a build with drawtext), jq.
-# Optional personal tools (skipped if missing): graphify, rtk, Unity CLI.
+# Required AI tooling (CLAUDE.md), installed once per machine; this script only hooks it up:
+#   graphify: pip install graphifyy && graphify install
+#   rtk:      rtk init -g
+#   headroom: alias claude="headroom wrap claude"
+#   caveman, ponytail: Claude Code plugins, offered on first open (.claude/settings.json)
+# Unity CLI is only needed for real production.
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -21,11 +26,16 @@ if command -v graphify >/dev/null; then
   jq '{hooks: .hooks}' .claude/settings.json > .claude/settings.local.json
   cp "$backup" .claude/settings.json
   rm -f "$backup" .claude/settings.json.graphify-bak
+  graphify update .   # build the code knowledge graph (local, no LLM)
 else
-  echo "graphify not found, skipped (optional: pip install graphifyy && graphify install)"
+  echo "MISSING graphify (required for AI sessions): pip install graphifyy && graphify install, then rerun"
 fi
 
-if command -v rtk >/dev/null; then rtk init --show; else echo "rtk not found, skipped (optional)"; fi
+if command -v rtk >/dev/null; then
+  rtk init --show
+else
+  echo "MISSING rtk (required for AI sessions): install rtk, run rtk init -g, then rerun"
+fi
 
 # Official Unity CLI skill (used by unity-scene-builder); the agent name may change between versions
 if command -v unity >/dev/null; then

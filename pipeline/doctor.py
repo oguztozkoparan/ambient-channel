@@ -45,6 +45,14 @@ def run() -> int:
         (handle != PLACEHOLDER_HANDLE, f"brand: {handle}", "/brand-setup"),
         (Path(".git").exists(), "git repository", "git init"),
         (bool(shutil.which("jq")), "jq (ruff hook)", "brew install jq"),
+        # required AI tooling (see CLAUDE.md): token savings and the project knowledge graph
+        (bool(shutil.which("graphify")), "graphify", "pip install graphifyy && graphify install"),
+        (
+            Path("graphify-out/graph.json").exists(),
+            "graphify knowledge graph",
+            "graphify update .",
+        ),
+        (bool(shutil.which("rtk")), "rtk", "install rtk, then rtk init -g"),
         (bool(shutil.which("unity")), "Unity CLI", "brew install --cask unity-cli"),
         (
             Path("unity/ProjectSettings").exists(),

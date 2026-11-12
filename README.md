@@ -8,9 +8,10 @@ Supported platform: macOS (Apple Silicon tested). Linux and Windows are untested
 1. Prerequisites: `uv`, `jq` and an ffmpeg with drawtext. macOS:
    `brew install uv jq ffmpeg-full && brew link ffmpeg-full`
    (Homebrew's plain `ffmpeg` package does not include drawtext; Short texts and the pomodoro timer use it.)
-2. `./bootstrap.sh` — installs Python dependencies, hooks up optional tools (graphify, rtk, Unity CLI skill) if present, and runs the readiness check.
-3. Brand: in Claude Code, `/brand-setup` → `config/brand.yaml` (fork) or `/brand-setup --local` → `config/brand.local.yaml` (not committed).
-4. Trial build (no Unity or real audio needed):
+2. AI tooling (required; it saves tokens and keeps a knowledge graph of the project, and the agent rules in `CLAUDE.md` depend on it): `pip install graphifyy && graphify install`, install rtk and run `rtk init -g`, and accept the caveman and ponytail plugins when Claude Code offers them on first open.
+3. `./bootstrap.sh` — installs Python dependencies, hooks up graphify and rtk for this clone, builds the knowledge graph and runs the readiness check.
+4. Brand: in Claude Code, `/brand-setup` → `config/brand.yaml` (fork) or `/brand-setup --local` → `config/brand.local.yaml` (not committed).
+5. Trial build (no Unity or real audio needed):
    ```sh
    uv run python -m pipeline build episodes/_template --trial
    uv run python -m pipeline qc output/example-outpost-night

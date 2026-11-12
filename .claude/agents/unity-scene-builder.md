@@ -18,3 +18,4 @@ You own the Unity scene kit (Unity 6, URP).
 - Outputs go under `assets/clips/<slug>/`.
 - Make code changes through files; use the CLI for scene/inspector operations and render triggering.
 - Trial builds (`--trial`) use synthetic clips and do not involve you. For a real build, `uv run python -m pipeline check episodes/<slug>` lists the clip paths it expects from you.
+- Follow the "Required tooling" rules in `CLAUDE.md`: `graphify query` before grep/glob/read when searching, condensed rtk output as-is (`rtk bypass` only when unusable).
