@@ -51,15 +51,16 @@ class Short(_Model):
     hook: str
     line2: str | None = None
     cta: str
-    text_color: str
-    outline_color: str
+    # new brand fields always get a default so older forks' brand.yaml keeps working
+    text_color: str = "white"
+    outline_color: str = "black"
 
 
 class Pomodoro(_Model):
     work_min: float
     break_min: float
-    work_label: str
-    break_label: str
+    work_label: str = "Focus"
+    break_label: str = "Break"
 
 
 class Watermark(_Model):
@@ -146,7 +147,10 @@ def load_brand() -> dict:
 
 
 def load_episode(episode_dir: Path, duration: str | None = None) -> Episode:
-    raw = _load(Path(episode_dir) / "episode.yaml")
+    path = Path(episode_dir) / "episode.yaml"
+    if not path.is_file():
+        raise FileNotFoundError(f"episode not found: {path}")
+    raw = _load(path)
     brand = load_brand()
     use_cases = _load(CONFIG / "use_cases.yaml")
     name = raw.get("use_case", "general")

@@ -19,6 +19,7 @@ def write(
     loop_s: float,
     total_s: float,
     short_info: dict,
+    trial: bool = False,
 ) -> None:
     footer = ep.description_footer.strip()
     peaks = [e.peak_db for e in rendered.events]
@@ -33,6 +34,7 @@ def write(
         "short": {"hook": ep.short.hook, "line2": ep.short.line2, "cta": ep.short.cta},
         "build": {
             "episode_dir": str(episode_dir),
+            "trial": trial,
             "use_case": ep.use_case,
             "variant_of": ep.variant_of,
             "seed": ep.seed,

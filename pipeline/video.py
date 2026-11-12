@@ -8,6 +8,7 @@ from pipeline.config import Episode
 from pipeline.ffmpeg import duration, ffmpeg, probe
 
 W, H = 1920, 1080
+THUMB_W, THUMB_H = 1280, 720
 WM_MARGIN = 40
 POMO_SIZE = 72  # overlay font size/position ratios: layout constants, not brand
 POMO_MARGIN = 60
@@ -60,6 +61,12 @@ def encode_loop(ep: Episode, work: Path) -> Path:
         progress=("loop encode", duration(clip)),
     )  # fmt: skip
     return out
+
+
+def thumbnail(loop: Path, out: Path) -> None:
+    """Middle frame of the loop as a 1280x720 JPEG (YouTube thumbnail size, under its 2 MB cap)."""
+    grab = ["-ss", duration(loop) / 2, "-i", loop, "-frames:v", 1, "-update", 1]
+    ffmpeg(*grab, "-vf", f"scale={THUMB_W}:{THUMB_H}", "-q:v", 2, out)
 
 
 def _concat_list(loop: Path, repeats: int, path: Path) -> Path:

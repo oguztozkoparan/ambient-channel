@@ -87,6 +87,15 @@ def _short(short: Path) -> list[dict]:
     ]
 
 
+def _thumbnail(path: Path) -> dict:
+    if not path.is_file():
+        return _check("thumbnail", None, "1280x720, <= 2 MB", False)
+    image = ffmpeg.probe(path)["streams"][0]
+    value = f"{image['width']}x{image['height']}, {path.stat().st_size / 1e6:.2f} MB"
+    ok = (image["width"], image["height"]) == (1280, 720) and path.stat().st_size <= 2_000_000
+    return _check("thumbnail", value, "1280x720, <= 2 MB", ok)
+
+
 def _words(text: str) -> set[str]:
     return set(re.findall(r"\w+", text.lower()))
 
@@ -160,12 +169,15 @@ def run(out: Path) -> int:
     checks += [_seam_visual(long, build, work), _seam_audio(long, build, work)]
     checks += _sleep(build)
     checks += _short(short)
+    checks.append(_thumbnail(out / "thumbnail.jpg"))
     checks += _metadata(meta)
     checks.append(_licenses(build))
 
     (out / "qc.json").write_text(json.dumps(checks, indent=2, ensure_ascii=False) + "\n")
     for c in checks:
         print(f"{'pass' if c['pass'] else 'FAIL'}  {c['check']}: {c['value']} ({c['threshold']})")
+    if build.get("trial"):
+        print("TRIAL build: synthetic inputs and/or shortened duration; not for upload")
     failed = [c["check"] for c in checks if not c["pass"]]
     print(f"{out}/qc.json: " + ("all checks pass" if not failed else f"FAIL: {failed}"))
     return 1 if failed else 0

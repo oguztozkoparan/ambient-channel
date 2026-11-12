@@ -5,8 +5,8 @@ Production pipeline for a YouTube ambient channel. Goal: original long videos th
 This file is the single source of truth for all coding agents; `CLAUDE.md` imports it.
 
 ## Architecture
-- `unity/` — Unity 6 project: parametric scene kit (preset ScriptableObjects: lighting, weather, camera, effects). Output: seamless 16:9 loop clip + separate 9:16 camera clip.
-- `pipeline/` — Python 3.12 + ffmpeg CLI (a build with drawtext; on macOS `ffmpeg-full`). `episode.yaml` → `output/<slug>/{long.mp4, short.mp4, metadata.json, qc.json}`.
+- `unity/` — the user's own Unity 6 project (not shipped with this repo; `docs/KICKOFF.md` is a prompt for building it): parametric scene kit (preset ScriptableObjects: lighting, weather, camera, effects). Output: seamless 16:9 loop clip + separate 9:16 camera clip.
+- `pipeline/` — Python 3.12 + ffmpeg CLI (a build with drawtext; on macOS `ffmpeg-full`). `episode.yaml` → `output/<slug>/{long.mp4, short.mp4, thumbnail.jpg, metadata.json, qc.json}`.
 - `config/brand.yaml` — channel identity. `config/brand.local.yaml` (not tracked in git) overrides it per field with the same schema.
 - `config/use_cases.yaml` — defaults for `general` (default, multi-purpose), `sleep`, `focus`: duration, LUFS, event density, overlay.
 - `episodes/<slug>/episode.yaml` — the episode's single source of truth. Template: `episodes/_template/episode.yaml`.
@@ -15,10 +15,10 @@ This file is the single source of truth for all coding agents; `CLAUDE.md` impor
 
 ## Commands
 - Setup: `uv sync`
-- Build: `uv run python -m pipeline build episodes/<slug> [--duration 10m]`
+- Input check: `uv run python -m pipeline check episodes/<slug>` (validates the config and lists every missing input at once)
+- Build: `uv run python -m pipeline build episodes/<slug> [--trial | --duration 10m]`
 - QC: `uv run python -m pipeline qc output/<slug>`
 - Readiness check: `uv run python -m pipeline doctor`
-- Trial input: `uv run python -m pipeline synth episodes/<slug>` (generates missing clips/audio synthetically; not used for real episodes)
 - Test: `uv run pytest -q`
 - Lint: `uv run ruff check . && uv run ruff format --check .`
 - Unity (official Unity CLI): `unity open unity`, `unity pipeline list`, `unity command`. For syntax use `unity <command> --help`; do not write it from memory.
@@ -34,10 +34,17 @@ This file is the single source of truth for all coding agents; `CLAUDE.md` impor
 - ffmpeg/ffprobe calls in the pipeline run with `-hide_banner -loglevel error -nostats`; if progress is needed, it is written to a separate file with `-progress`.
 - Minimal diff; no unrequested refactors. If you see an unrelated problem, report it in one line.
 
+## Trial mode
+- `--trial` proves the whole chain works without real assets or hours of waiting. `pipeline build episodes/<slug> --trial` generates any missing clips/audio synthetically (color bars, noise) and builds a 10-minute video instead of the full duration; the same steps and QC checks run.
+- `/build-episode <slug> --trial` and `/weekly-batch --trial` pass it through. Offer it whenever real assets are missing; never use it silently in place of a real build.
+- A trial output is never uploaded. `metadata.json` records `build.trial: true`; title, CTA and chapters still describe the full-length video, so the duration-consistency checks are skipped.
+- Synthetic files are written to the paths the episode names and are not overwritten later. Before the real build, replace them with real renders/recordings and update `assets/audio/LICENSES.md`.
+
 ## Branding
 - Every brand-specific value lives in `config/brand.yaml`. A fork commits its own `brand.yaml`; a local clone uses `brand.local.yaml`. Do not write the brand name, handle, language or CTA in any other file.
 - If `channel.handle` is still `@your-handle`, run the `brand-setup` skill before producing content (episodes, titles, Shorts).
 - A rebrand does not rewrite existing episodes; old texts are only listed.
+- New brand fields are always added with a default value in `pipeline/config.py`, so an older fork's `brand.yaml` keeps working after it pulls updates.
 
 ## Tools
 - Unity: official Unity CLI (`unity`), via Bash. Unity MCP is not used. Driving a running Editor requires the Unity Pipeline package in the project (`unity pipeline install`).

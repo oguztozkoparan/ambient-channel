@@ -11,6 +11,8 @@ user-invocable: false
 - Loop seam (audio): RMS jump < 3 dB in a ±50 ms window around the boundary, no click.
 - use_case: the duration and LUFS target are resolved from `config/use_cases.yaml` + episode overrides. `sleep`: no event peak above the bed RMS by more than +10 dB. `focus`: pomodoro phase changes match the minutes in config within ±1 s.
 - Short spec: 1080x1920, 20–45 s, hook visible within 0–2 s, CTA in the last 3 s.
+- Thumbnail: `thumbnail.jpg` is 1280x720 and at most 2 MB.
 - Metadata: the title has no more than 70% word overlap with any of the last 20 episodes; description and chapters are filled; the duration in the title matches the real duration; no chapter exceeds the video duration.
 - Brand: texts are in the `config/brand.yaml` `channel.language` language; the description ends with `metadata.description_footer`; the Short CTA comes from the `short.cta` template (or the episode override); if `watermark.file` is set, it is visible in the long and the short.
 - Audio sources: every file used is recorded in `assets/audio/LICENSES.md`.
+- Trial builds (`build.trial: true` in `metadata.json`): synthetic inputs and a shortened duration are intended; the title-duration and chapter checks are skipped. A trial that passes proves the flow, not the episode: it is never uploaded.

@@ -17,3 +17,4 @@ You own the Unity scene kit (Unity 6, URP).
 - Render: Unity Recorder with 16:9 1080p and a separate 9:16 camera, a single editor script triggered from the CLI. Recorder needs play mode and a GPU: first run it through the open Editor with `unity command`; test the headless `unity run` path during setup, do not assume it works until verified.
 - Outputs go under `assets/clips/<slug>/`.
 - Make code changes through files; use the CLI for scene/inspector operations and render triggering.
+- Trial builds (`--trial`) use synthetic clips and do not involve you. For a real build, `uv run python -m pipeline check episodes/<slug>` lists the clip paths it expects from you.
