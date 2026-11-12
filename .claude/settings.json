@@ -39,7 +39,11 @@
       "mcp__fal__run_model",
       "mcp__fal__submit_job"
     ],
-    "deny": ["Read(./.env)", "Read(./.env.*)", "Bash(git push --force *)"]
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Bash(git push --force *)"
+    ]
   },
   "hooks": {
     "PostToolUse": [
@@ -49,6 +53,28 @@
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/ruff.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "graphify hook-guard search",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "graphify hook-guard read",
+            "timeout": 10
           }
         ]
       }

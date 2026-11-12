@@ -18,15 +18,8 @@ need ffmpeg "brew install ffmpeg-full && brew link ffmpeg-full"
 uv sync
 
 if command -v graphify >/dev/null; then
-  backup=$(mktemp)
-  cp .claude/settings.json "$backup"
-  graphify claude install   # overwrites settings.json without merging
-  graphify hook install
-  # graphify hooks (contain absolute paths) move to local; the committed settings are restored
-  jq '{hooks: .hooks}' .claude/settings.json > .claude/settings.local.json
-  cp "$backup" .claude/settings.json
-  rm -f "$backup" .claude/settings.json.graphify-bak
-  graphify update .   # build the code knowledge graph (local, no LLM)
+  graphify hook install   # git hooks: rebuild the graph after commit/checkout/merge
+  graphify update .       # build the code knowledge graph (local, no LLM)
 else
   echo "MISSING graphify (required for AI sessions): pip install graphifyy && graphify install, then rerun"
 fi
