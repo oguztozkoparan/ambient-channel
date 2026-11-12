@@ -57,6 +57,7 @@ def encode_loop(ep: Episode, work: Path) -> Path:
         # -bf 0: B-frame gecikmesi/edit list olmadan her tekrar tam N frame ve temiz pts verir
         "-bf", 0, "-g", _frames(clip), "-sc_threshold", 0, "-flags", "+cgop",
         "-movflags", "+faststart", out,
+        progress=("loop encode", duration(clip)),
     )  # fmt: skip
     return out
 
@@ -118,7 +119,10 @@ def build_long(ep: Episode, loop: Path, audio: Path, total_s: float, out: Path) 
         t0, errs = time.monotonic(), []
         for enc in _encoders(ep):
             try:
-                ffmpeg(*src, "-vf", vf, *enc, "-pix_fmt", "yuv420p", *tail, out)
+                ffmpeg(
+                    *[*src, "-vf", vf, *enc, "-pix_fmt", "yuv420p", *tail, out],
+                    progress=(f"long encode ({enc[1]})"[:18], total_s),
+                )
                 break
             except RuntimeError as e:
                 errs.append(str(e))

@@ -2,6 +2,8 @@
 
 YouTube ambient kanalı için üretim pipeline'ı: `episode.yaml` → long video + Short + metadata + QC. Kanal kimliği `config/brand.yaml`'dan gelir; repoyu fork'layıp veya klonlayıp kendi markanızla kullanabilirsiniz. Upload manuel (YouTube Studio).
 
+Supported platform: macOS (Apple Silicon tested). Linux and Windows are untested.
+
 ## Kurulum (klon başına bir kez)
 1. Önkoşullar: `uv`, `jq` ve drawtext içeren bir ffmpeg. macOS:
    `brew install uv jq ffmpeg-full && brew link ffmpeg-full`
@@ -22,7 +24,7 @@ Her an `uv run python -m pipeline doctor` neyin hazır, neyin eksik olduğunu s�
 - Unity CLI: `brew install --cask unity-cli`, `unity auth login`, `unity install lts`. Projeyi aç: `unity open unity`. Editor açıkken `unity pipeline install`; kontrol: `unity pipeline list` → "Pipeline: Installed". Unity Recorder paketini (`com.unity.recorder`) ekle.
 - Ses: dosyalar `assets/audio/` altına (git'e girmez), her biri `assets/audio/LICENSES.md` içine kaynak ve lisansıyla. Şablondaki sentetik placeholder satırlarını gerçek kayıtlarla değiştirin.
 - fal.ai MCP opsiyonel (thumbnail arka planı / konsept görseli; her üretim fal kredisi harcar). `.mcp.json`'da tanımlı; ilk kullanımda `/mcp` ile OAuth. Ana loop görselinde kullanılmaz.
-- Unity sahne kiti henüz yazılmadı; o iş için hazır oturum prompt'u: `docs/KICKOFF.md`.
+- The Unity scene kit is not part of this repo: each user builds their own under `unity/`. `docs/KICKOFF.md` is a ready-made session prompt for that.
 
 Ajan talimatları `AGENTS.md`'de (Claude Code, Codex, Cursor vb. ortak); `CLAUDE.md` onu import eder.
 
@@ -31,6 +33,8 @@ Ajan talimatları `AGENTS.md`'de (Claude Code, Codex, Cursor vb. ortak); `CLAUDE
 Tek video: `/new-episode <slug> <tema>` → `/build-episode <slug>`.
 
 ## Build süreleri
+Long steps draw a progress bar with a time estimate (one line per 10% when not on a terminal).
+
 Apple M1'de ölçüldü (60 sn'lik 1080p loop, sentetik girdi):
 - 10 dakikalık deneme build'i: toplam ~47 sn (loop encode ~12 sn, kalanı ses + Short).
 - 10 saatlik build (tahmin, ölçülmedi): ~50 dk. Neredeyse tamamı two-pass loudnorm (~13x gerçek zaman); loop encode tek sefer ~12 sn, concat + mux ~15 sn. Geçici ses dosyası için ~14 GB boş disk gerekir.

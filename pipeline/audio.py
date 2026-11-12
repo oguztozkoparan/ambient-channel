@@ -11,6 +11,7 @@ import soundfile as sf
 
 from pipeline.config import Episode, event_files
 from pipeline.ffmpeg import ffmpeg
+from pipeline.progress import Progress
 
 SR = 48000
 CHUNK_S = 30
@@ -119,10 +120,14 @@ def _plan_events(ep: Episode, work: Path, total: int, bed_rms_db: float):
     return plan
 
 
-def _loudnorm(ep: Episode, raw: Path, out: Path) -> None:
+def _loudnorm(ep: Episode, raw: Path, out: Path, duration_s: float) -> None:
     a = ep.audio
     base = f"loudnorm=I={a.target_lufs}:TP={a.true_peak}"
-    log = ffmpeg("-i", raw, "-af", f"{base}:print_format=json", "-f", "null", "-", loglevel="info")
+    log = ffmpeg(
+        *["-i", raw, "-af", f"{base}:print_format=json", "-f", "null", "-"],
+        loglevel="info",
+        progress=("loudnorm 1/2", duration_s),
+    )
     m = json.loads(log[log.rindex("{") : log.rindex("}") + 1])
     # hedef LRA >= ölçülen LRA: aksi hâlde loudnorm linear yerine dinamik (pompalayan) moda düşer
     lra = min(max(math.ceil(float(m["input_lra"])), 1), 50)
@@ -131,7 +136,10 @@ def _loudnorm(ep: Episode, raw: Path, out: Path) -> None:
         f":measured_TP={m['input_tp']}:measured_thresh={m['input_thresh']}"
         f":offset={m['target_offset']}:linear=true"
     )
-    ffmpeg("-i", raw, "-af", second, "-ar", SR, "-ac", 2, "-c:a", "aac", "-b:a", "192k", out)
+    ffmpeg(
+        *["-i", raw, "-af", second, "-ar", SR, "-ac", 2, "-c:a", "aac", "-b:a", "192k", out],
+        progress=("loudnorm 2/2", duration_s),
+    )
 
 
 def render(ep: Episode, work: Path, duration_s: float) -> AudioResult:
@@ -148,6 +156,7 @@ def render(ep: Episode, work: Path, duration_s: float) -> AudioResult:
 
     plan = _plan_events(ep, work, total, bed_rms_db)
     raw = work / "audio_raw.w64"
+    bar = Progress("audio render")
     with sf.SoundFile(raw, "w", SR, 2, format="W64", subtype="FLOAT") as w:
         for c0 in range(0, total, CHUNK_S * SR):
             n = min(CHUNK_S * SR, total - c0)
@@ -157,10 +166,12 @@ def render(ep: Episode, work: Path, duration_s: float) -> AudioResult:
                 if a < b:
                     buf[a - c0 : b - c0] += src[a - start : b - start] * scale
             w.write(buf)
+            bar.update((c0 + n) / total)
+    bar.done()
 
     out = work / "audio.m4a"
     try:
-        _loudnorm(ep, raw, out)
+        _loudnorm(ep, raw, out, total / SR)
     finally:
         raw.unlink(missing_ok=True)
     hits = [h for *_, h in plan]
